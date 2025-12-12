@@ -171,7 +171,6 @@ def main():
         onnx_path,
         input_names=["input"],
         output_names=["logits"],
-        dynamic_axes={"input": {0: "batch"}},
         opset_version=18,
     )
 
