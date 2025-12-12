@@ -5,7 +5,6 @@ SKYSTATE_TO_ID = {
     "precipitation": 3,
     "unknown": 4,
 }
-
 ID_TO_SKYSTATE = {v: k for k, v in SKYSTATE_TO_ID.items()}
 
 def encode_skystate(s: str) -> int:
