@@ -1,2 +1,4 @@
 Pillow
 python-dotenv
+onnx
+onnxscript

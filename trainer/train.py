@@ -3,6 +3,7 @@ import json
 import random
 from datetime import datetime, timezone
 from pathlib import Path
+import torch.onnx
 
 import torch
 import torch.nn as nn
@@ -158,6 +159,23 @@ def main():
     (out_dir / "meta.json").write_text(json.dumps(meta, indent=2), encoding="utf-8")
 
     print(f"\n✅ wrote: {out_dir}")
+
+    onnx_path = out_dir / "model.onnx"
+
+    dummy = torch.randn(1, 3, args.img, args.img, device=device)
+    model.eval()
+
+    torch.onnx.export(
+        model,
+        dummy,
+        onnx_path,
+        input_names=["input"],
+        output_names=["logits"],
+        dynamic_axes={"input": {0: "batch"}},
+        opset_version=18,
+    )
+
+    print(f"✅ wrote ONNX: {onnx_path}")
 
 
 if __name__ == "__main__":
