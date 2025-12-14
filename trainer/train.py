@@ -41,7 +41,7 @@ def main():
     p.add_argument("--img", type=int, default=224)
     p.add_argument("--seed", type=int, default=42)
     p.add_argument("--val", type=float, default=0.2)
-    p.add_argument("--resume", action="store_true")
+    p.add_argument("--from-scratch", action="store_true", help="Train from scratch instead of resuming")
     args = p.parse_args()
 
     cfg = TrainerConfig()
@@ -88,11 +88,17 @@ def main():
     models_root.mkdir(parents=True, exist_ok=True)
     latest_ckpt = models_root / "latest.pt"
 
-    if args.resume and latest_ckpt.exists():
-        ckpt = torch.load(latest_ckpt, map_location=device)
-        model.load_state_dict(ckpt["model"])
-        opt.load_state_dict(ckpt["opt"])
-        print(f"resumed from {latest_ckpt}")
+    # Auto-resume from latest checkpoint unless --from-scratch is set
+    if not args.from_scratch and latest_ckpt.exists():
+        try:
+            ckpt = torch.load(latest_ckpt, map_location=device, weights_only=False)
+            model.load_state_dict(ckpt["model"])
+            opt.load_state_dict(ckpt["opt"])
+            print(f"Resuming from previous model: {latest_ckpt}")
+        except Exception as e:
+            print(f"Could not load checkpoint ({e}), training from scratch")
+    else:
+        print("Training from scratch (no previous model or --from-scratch set)")
 
     def eval_epoch():
         model.eval()
